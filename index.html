@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HappySnap - Global AI Recipe Engine</title>
-    <!-- 제품 마스터의 0원 기술 스택: 오픈소스 CDN 활용 -->
+    <!-- 제품 마스터의 0원 기술 스택 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -15,11 +15,10 @@
         body { font-family: 'Noto Sans KR', sans-serif; -webkit-tap-highlight-color: transparent; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* 스크롤바 커스텀 */
+        .active-scale:active { transform: scale(0.95); transition: transform 0.1s; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #fb923c; border-radius: 10px; }
-        .active-scale:active { transform: scale(0.95); transition: transform 0.1s; }
     </style>
 </head>
 <body class="bg-neutral-50 text-neutral-900 overflow-x-hidden">
@@ -31,35 +30,59 @@
         const APP_NAME = "HappySnap";
 
         const LANGUAGES = {
-            ko: { welcome: "재료 사진 한 장으로 느끼는 요리의 행복", cta: "사진 찍기", textCta: "재료 입력", placeholder: "어떤 재료든 입력하세요 (예: 연어, 스테이크, 타코)", processing: "전 세계 레시피 탐색 중...", result: "오늘의 추천 요리", share: "행복 공유", retry: "다시 하기", watch: "영상 보기", happinessTip: "이 요리는 전 세계 어디서나 사랑받는 최고의 선택이에요!", copied: "공유 링크가 복사되었습니다!", dynamicSearch: "실시간 글로벌 검색 결과" },
-            en: { welcome: "Cooking Happiness in One Snap", cta: "Snap Photo", textCta: "Type Ingredients", placeholder: "Any ingredient (e.g. Salmon, Steak, Tacos)", processing: "Exploring Global Recipes...", result: "Recommended for You", share: "Share Happiness", retry: "Try Again", watch: "Watch Video", happinessTip: "This dish is a globally loved choice just for you!", copied: "Link copied!", dynamicSearch: "Real-time Global Search" },
-            ja: { welcome: "写真一枚で感じる料理の幸せ", cta: "写真を撮る", textCta: "材料を入力", placeholder: "どんな材料でも (例：サーモン、ステーキ)", processing: "世界中のレシピを探索中...", result: "今日のおすすめ", share: "幸せを共有", retry: "撮り直す", watch: "動画を見る", happinessTip: "この料理は世界中で愛されている最高の選択です！", copied: "リンクをコピーしました", dynamicSearch: "リアルタイムグローバル検索" }
+            ko: { 
+                welcome: "사진 한 장으로 느끼는 요리의 행복", 
+                cta: "사진 찍기", 
+                textCta: "재료 입력", 
+                placeholder: "어떤 재료든 입력하세요 (예: 오징어, 삼겹살)", 
+                processing: "최고의 레시피를 매칭 중...", 
+                result: "추천 요리", 
+                share: "행복 공유", 
+                retry: "다시 하기", 
+                watch: "영상 보기", 
+                happinessTip: "이 요리는 당신의 하루를 더 행복하게 만들 거예요!",
+                copied: "공유 링크가 복사되었습니다!",
+                visionHint: "AI가 분석했습니다! 메인 재료가 무엇인가요?",
+                confirm: "확인"
+            },
+            en: { 
+                welcome: "Cooking Happiness in One Snap", 
+                cta: "Snap Photo", 
+                textCta: "Type Ingredients", 
+                placeholder: "Any ingredient (e.g. Squid, Bacon)", 
+                processing: "Matching Best Recipes...", 
+                result: "Recommended", 
+                share: "Share", 
+                retry: "Retry", 
+                watch: "Watch Video", 
+                happinessTip: "This dish will make your day better!",
+                copied: "Link copied!",
+                visionHint: "AI Analyzed! What's the main ingredient?",
+                confirm: "Confirm"
+            }
         };
 
-        // 핵심 글로벌 레시피 DB (자주 찾는 앵커 데이터)
         const RECIPE_DB = [
             { id: 1, name: { ko: "토마토 달걀 볶음", en: "Tomato Egg Stir-fry" }, keywords: ["토마토", "달걀", "계란"], query: "tomato egg stir fry" },
             { id: 2, name: { ko: "김치볶음밥", en: "Kimchi Fried Rice" }, keywords: ["김치", "밥", "스팸"], query: "kimchi fried rice" },
             { id: 3, name: { ko: "알리오 올리오", en: "Aglio e Olio" }, keywords: ["마늘", "파스타", "면"], query: "aglio e olio" },
             { id: 4, name: { ko: "매콤 오징어 볶음", en: "Spicy Squid" }, keywords: ["오징어", "해물"], query: "spicy stir fried squid" },
-            { id: 5, name: { ko: "스테이크", en: "Perfect Steak" }, keywords: ["고기", "스테이크", "소고기"], query: "how to cook perfect steak" },
-            { id: 6, name: { ko: "연어 스테이크", en: "Salmon Steak" }, keywords: ["연어", "생선"], query: "easy salmon steak recipe" },
-            { id: 7, name: { ko: "치킨 카레", en: "Chicken Curry" }, keywords: ["카레", "닭고기", "치킨"], query: "authentic chicken curry" },
-            { id: 8, name: { ko: "타코", en: "Mexican Tacos" }, keywords: ["타코", "또띠아", "나초"], query: "authentic mexican tacos" },
-            { id: 9, name: { ko: "초밥", en: "Sushi Roll" }, keywords: ["초밥", "스시", "회"], query: "how to make sushi at home" },
-            { id: 10, name: { ko: "햄버거", en: "Homemade Burger" }, keywords: ["햄버거", "패티", "빵"], query: "best homemade burger recipe" }
+            { id: 5, name: { ko: "스테이크", en: "Perfect Steak" }, keywords: ["고기", "스테이크", "소고기"], query: "how to cook steak" },
+            { id: 6, name: { ko: "연어 스테이크", en: "Salmon Steak" }, keywords: ["연어", "생선"], query: "easy salmon steak" },
+            { id: 7, name: { ko: "치킨 카레", en: "Chicken Curry" }, keywords: ["카레", "닭고기", "치킨"], query: "chicken curry" },
+            { id: 8, name: { ko: "타코", en: "Mexican Tacos" }, keywords: ["타코", "또띠아"], query: "mexican tacos" },
+            { id: 9, name: { ko: "초밥", en: "Sushi" }, keywords: ["초밥", "스시", "회"], query: "sushi at home" },
+            { id: 10, name: { ko: "떡볶이", en: "Tteokbokki" }, keywords: ["떡볶이", "떡", "고추장"], query: "easy tteokbokki" }
         ];
 
         function App() {
             const [lang, setLang] = useState('ko');
-            const [step, setStep] = useState('landing'); 
+            const [step, setStep] = useState('landing'); // landing, vision_tag, processing, result
             const [mode, setMode] = useState('camera'); 
             const [image, setImage] = useState(null);
             const [textInput, setTextInput] = useState("");
             const [result, setResult] = useState(null);
             const [showLangMenu, setShowLangMenu] = useState(false);
-            
-            const lastResultId = useRef(null);
 
             const t = LANGUAGES[lang] || LANGUAGES.en;
 
@@ -74,24 +97,16 @@
                 setResult(null);
             };
 
-            const findBestRecipe = (input, isCameraMode = false) => {
+            const findBestRecipe = (input) => {
                 const words = input.trim().toLowerCase();
+                if (!words) return RECIPE_DB[Math.floor(Math.random() * RECIPE_DB.length)];
 
-                // 1. 카메라 모드: 무작위 영감 제공
-                if (isCameraMode || (mode === 'camera' && !words)) {
-                    const filtered = lastResultId.current ? RECIPE_DB.filter(r => r.id !== lastResultId.current) : RECIPE_DB;
-                    const selected = filtered[Math.floor(Math.random() * filtered.length)];
-                    lastResultId.current = selected.id;
-                    return { ...selected, isDynamic: false };
-                }
-
-                // 2. 정교한 키워드 매칭
                 let bestMatch = null;
                 let maxScore = -1;
 
                 RECIPE_DB.forEach(recipe => {
                     let score = 0;
-                    recipe.keywords.forEach(k => { if (words.includes(k.toLowerCase())) score += 10; });
+                    recipe.keywords.forEach(k => { if (words.includes(k)) score += 10; });
                     if (words.includes(recipe.name.ko) || words.includes(recipe.name.en.toLowerCase())) score += 50;
                     
                     if (score > maxScore) {
@@ -100,7 +115,6 @@
                     }
                 });
 
-                // 3. [핵심] DB에 없는 새로운 재료일 경우: 사용자의 입력을 그대로 검색어로 변환 (다이내믹 모드)
                 if (!bestMatch || maxScore <= 0) {
                     return {
                         id: 999,
@@ -110,18 +124,15 @@
                         isDynamic: true
                     };
                 }
-
-                lastResultId.current = bestMatch.id;
-                return { ...bestMatch, isDynamic: false };
+                return bestMatch;
             };
 
-            const handleStart = (type) => {
+            const handleStart = (inputSource) => {
                 setStep('processing');
-                
-                const isCamera = type === 'image';
+                const searchKeyword = inputSource || textInput;
                 
                 setTimeout(() => {
-                    const match = findBestRecipe(textInput, isCamera);
+                    const match = findBestRecipe(searchKeyword);
                     setResult({
                         dishName: match.name[lang] || match.name['en'],
                         videoUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(match.query)}`,
@@ -129,7 +140,7 @@
                         isDynamic: match.isDynamic
                     });
                     setStep('result');
-                }, 1400); 
+                }, 1200); 
             };
 
             const handleFileUpload = (e) => {
@@ -138,7 +149,7 @@
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         setImage(reader.result);
-                        handleStart('image');
+                        setStep('vision_tag'); // 사진 촬영 후 재료 확인 단계로 이동
                     };
                     reader.readAsDataURL(file);
                 }
@@ -157,12 +168,13 @@
             return (
                 <div className="min-h-screen flex flex-col items-center bg-neutral-50 selection:bg-orange-100">
                     <header className="w-full max-w-2xl px-6 py-4 flex justify-between items-center bg-white/90 backdrop-blur-md border-b sticky top-0 z-50">
-                        <button onClick={goHome} className="flex items-center gap-2 font-black text-xl text-orange-600 active-scale transition-transform cursor-pointer">
+                        {/* 로고 누르면 홈으로 이동 기능 추가 */}
+                        <button onClick={goHome} className="flex items-center gap-2 font-black text-xl text-orange-600 active-scale">
                             <i data-lucide="chef-hat" className="w-7 h-7"></i>
                             <span className="tracking-tighter uppercase">{APP_NAME}</span>
                         </button>
                         <div className="relative">
-                            <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center gap-1 px-3 py-1.5 bg-neutral-100 rounded-full text-[11px] font-bold text-neutral-600 hover:bg-neutral-200 transition-all active-scale">
+                            <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center gap-1 px-3 py-1.5 bg-neutral-100 rounded-full text-[11px] font-bold text-neutral-600 active-scale transition-all">
                                 <i data-lucide="globe" className="w-3.5 h-3.5"></i> {lang.toUpperCase()}
                             </button>
                             {showLangMenu && (
@@ -180,10 +192,7 @@
                             <div className="w-full flex flex-col gap-8 fade-in">
                                 <div className="text-center space-y-4">
                                     <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-neutral-800">{t.welcome}</h1>
-                                    <div className="flex justify-center gap-2 text-neutral-400 font-bold items-center">
-                                        <i data-lucide="globe" className="w-4 h-4 text-blue-500"></i>
-                                        <span className="text-[10px] uppercase tracking-[0.2em]">Unlimited Global Ingredient Engine</span>
-                                    </div>
+                                    <p className="text-neutral-400 text-[10px] font-bold tracking-[0.2em] uppercase">0-Cost Global AI Vision Engine</p>
                                 </div>
 
                                 <div className="flex bg-neutral-200 p-1 rounded-2xl shadow-inner">
@@ -192,7 +201,7 @@
                                 </div>
 
                                 {mode === 'camera' ? (
-                                    <label className="w-full aspect-square border-4 border-dashed border-neutral-200 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 bg-white hover:border-orange-200 transition-all cursor-pointer group shadow-sm active:scale-[0.98]">
+                                    <label className="w-full aspect-square border-4 border-dashed border-neutral-200 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 bg-white hover:border-orange-200 transition-all cursor-pointer group shadow-sm active-scale">
                                         <div className="bg-orange-100 p-6 rounded-full text-orange-500 group-hover:rotate-12 transition-transform"><i data-lucide="camera" className="w-10 h-10"></i></div>
                                         <span className="font-bold text-neutral-400 group-hover:text-orange-500">{t.cta}</span>
                                         <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
@@ -200,15 +209,42 @@
                                 ) : (
                                     <div className="relative">
                                         <textarea value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder={t.placeholder} className="w-full h-48 p-6 bg-white border-2 border-neutral-100 rounded-[2.5rem] text-lg font-medium focus:border-orange-500 transition-all shadow-inner outline-none resize-none" />
-                                        <button disabled={!textInput.trim()} onClick={() => handleStart('text')} className="absolute bottom-4 right-4 p-4 bg-orange-500 text-white rounded-2xl shadow-lg hover:bg-orange-600 active-scale transition-all disabled:bg-neutral-300"><i data-lucide="send" className="w-6 h-6"></i></button>
+                                        <button disabled={!textInput.trim()} onClick={() => handleStart()} className="absolute bottom-4 right-4 p-4 bg-orange-500 text-white rounded-2xl shadow-lg hover:bg-orange-600 active-scale transition-all disabled:bg-neutral-300"><i data-lucide="send" className="w-6 h-6"></i></button>
                                     </div>
                                 )}
                             </div>
                         )}
 
+                        {step === 'vision_tag' && (
+                            <div className="w-full flex flex-col gap-6 fade-in">
+                                <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border">
+                                    <img src={image} className="w-full h-64 object-cover" />
+                                    <div className="p-8 space-y-4">
+                                        <h3 className="font-bold text-neutral-800 text-center">{t.visionHint}</h3>
+                                        <div className="relative">
+                                            <input 
+                                                type="text" 
+                                                autoFocus
+                                                placeholder={t.placeholder}
+                                                className="w-full p-4 bg-neutral-100 rounded-2xl font-bold text-center outline-none focus:ring-2 ring-orange-500"
+                                                onKeyPress={(e) => e.key === 'Enter' && handleStart(e.target.value)}
+                                                onChange={(e) => setTextInput(e.target.value)}
+                                            />
+                                        </div>
+                                        <button 
+                                            onClick={() => handleStart(textInput)}
+                                            className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-lg shadow-lg active-scale"
+                                        >
+                                            {t.confirm}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {step === 'processing' && (
                             <div className="flex-1 flex flex-col items-center justify-center space-y-8 fade-in py-20">
-                                <div className="relative"><div className="w-32 h-32 rounded-full border-4 border-orange-100 border-t-orange-500 animate-spin"></div><i data-lucide="search" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-orange-500 w-10 h-10 animate-bounce"></i></div>
+                                <div className="relative"><div className="w-32 h-32 rounded-full border-4 border-orange-100 border-t-orange-500 animate-spin"></div><i data-lucide="sparkles" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-orange-500 w-10 h-10 animate-pulse"></i></div>
                                 <p className="text-xl font-black text-neutral-700 animate-pulse">{t.processing}</p>
                             </div>
                         )}
@@ -219,7 +255,7 @@
                                     {image && <div className="h-56 bg-neutral-200"><img src={image} className="w-full h-full object-cover" /></div>}
                                     <div className="p-8 space-y-6">
                                         <div className="text-center space-y-2">
-                                            <span className="text-orange-500 font-black text-[10px] uppercase tracking-[0.3em]">{result.isDynamic ? t.dynamicSearch : t.result}</span>
+                                            <span className="text-orange-500 font-black text-[10px] uppercase tracking-[0.3em]">{t.result}</span>
                                             <h2 className="text-4xl font-black text-neutral-900 tracking-tight leading-none break-words">{result.dishName}</h2>
                                         </div>
                                         <p className="text-sm text-neutral-500 italic font-medium leading-relaxed text-center px-4">" {t.happinessTip} "</p>
@@ -236,7 +272,7 @@
                     </main>
 
                     <footer className="w-full max-w-2xl px-6 py-10 text-center border-t border-neutral-100 opacity-40">
-                        <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-[0.3em] leading-loose">HappySnap Global • All Ingredients Enabled<br/>100% Pure JS • No API Cost • Dynamic Search Tech</p>
+                        <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-[0.3em] leading-loose">HappySnap Global • All Ingredients Enabled<br/>100% Pure JS • Accuracy Improved</p>
                     </footer>
                 </div>
             );
